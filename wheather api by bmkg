@@ -1,0 +1,48 @@
+import requests
+
+
+adm4 = input("Masukkan kode wilayah BMKG (contoh 31.71.03.1001): ").strip()
+base_url ="https://www.bmkg.go.id/cuaca/prakiraan-cuaca/31.74"
+
+try:
+    response = requests.get(base_url, params={"adm4": adm4}, timeout=10)
+    response.raise_for_status()
+    weather_data = response.json()
+
+    location = weather_data["lokasi"]
+    forecast_groups = weather_data["data"][0]["cuaca"]
+    forecasts = [item for group in forecast_groups for item in group]
+    forecast = forecasts[0]
+
+    print(f"\nCuaca di {location.get('desa', '-')}, {location.get('kecamatan', '-')}")
+    print("=" * 45)
+    print(f"Kabupaten/Kota : {location.get('kotkab', '-')}")
+    print(f"Provinsi       : {location.get('provinsi', '-')}")
+    print(f"Koordinat      : {location.get('lat', '-')}, {location.get('lon', '-')}")
+    print(f"Zona waktu     : {location.get('timezone', '-')}")
+    print(f"Waktu          : {forecast.get('local_datetime', '-')}")
+    print(f"Kondisi        : {forecast.get('weather_desc', '-')}")
+    print(f"Suhu           : {forecast.get('t', '-')} C")
+    print(f"Kelembapan     : {forecast.get('hu', '-')}%")
+    print(f"Kecepatan angin: {forecast.get('ws', '-')} km/jam")
+    print(f"Arah angin     : {forecast.get('wd', '-')}")
+    print(f"Tutupan awan   : {forecast.get('tcc', '-')}%")
+    print(f"Jarak pandang  : {forecast.get('vs_text', '-')} ({forecast.get('vs', '-')} m)")
+
+    print("\nPrakiraan berikutnya:")
+    for item in forecasts[1:4]:
+        print(
+            f"- {item.get('local_datetime', '-')}: "
+            f"{item.get('weather_desc', '-')}"
+            f", {item.get('t', '-')} C"
+        )
+except (requests.RequestException, KeyError, IndexError, ValueError) as error:
+    print(f"Data cuaca tidak dapat diambil: {error}")
+
+
+
+
+
+
+
+
